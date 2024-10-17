@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
@@ -41,7 +42,7 @@ namespace Курсовая
         {
             PictureBox pictureBox = new PictureBox();
             pictureBox.Name = $"{row}x{column}";
-            pictureBox.BackColor = Color.Black;
+            pictureBox.BackColor = Color.Green;
             pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox.Dock = DockStyle.Fill;
             pictureBox.Click += PictureBox_Click;
@@ -63,13 +64,42 @@ namespace Курсовая
                 string imagesFolderPath = Path.Combine(Application.StartupPath, "Images");
                 string imagePath = Path.Combine(imagesFolderPath, "Light_bulb.png");
                 pictureBox.BackgroundImage = Image.FromFile(imagePath);
-
-                string[] mas = pictureBox.Name.Split('x');
-
-                MarkCellByRow(Convert.ToInt32(mas[0]),pictureBox.Parent as TableLayoutPanel);
-                MarkCellByColumn(Convert.ToInt32(mas[1]), pictureBox.Parent as TableLayoutPanel);
             }
-            
+            CheckGameArea(pictureBox.Parent as TableLayoutPanel);
+        }
+
+        private void CheckGameArea(TableLayoutPanel tableLayoutPanel)
+        {
+            List<KeyValuePair<int, int>> Lights = new List<KeyValuePair<int, int>>(); 
+            for(int i = 0; i < tableLayoutPanel.RowCount; i++)
+            {
+                for (int k = 0; k < tableLayoutPanel.ColumnCount; k++)
+                {
+                    var control = tableLayoutPanel.GetControlFromPosition(k,i);
+                    if (control is PictureBox pictureBox)
+                    {
+                        if (pictureBox.BackgroundImage != null)
+                        {
+                            string[] mas = pictureBox.Name.Split('x');
+
+                            Lights.Add(new KeyValuePair<int, int>(Convert.ToInt32(mas[0]), Convert.ToInt32(mas[1])));
+                        }
+                        if (pictureBox.BackColor == Color.Red) 
+                        {
+                            pictureBox.BackColor = Color.Green;
+                        }
+                    }
+                }
+            }
+            foreach(KeyValuePair<int, int> light in Lights)
+            {
+                var control = tableLayoutPanel.GetControlFromPosition(light.Value, light.Key);
+                if (control is PictureBox pictureBox)
+                {
+                    MarkCellByRow(light.Key, pictureBox.Parent as TableLayoutPanel);
+                    MarkCellByColumn(light.Value, pictureBox.Parent as TableLayoutPanel);
+                }
+            }
         }
         private void MarkCellByColumn(int column, TableLayoutPanel tableLayoutPanel)
         {
